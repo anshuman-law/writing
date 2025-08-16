@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Writing for a Change • Web Lab</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#151930; --ink:#e9ecff; --muted:#a7b0d6; --accent:#8bd3ff; --accent2:#baffc9; --warn:#ffd166;
+    --ok:#95f29b; --bad:#ff99ad; --card:#191f3d; --line:#2a3056;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,#0b0f1a,#141a33 60%,#0b0f1a);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+  a{color:var(--accent)}
+  .app{display:grid;grid-template-columns:280px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+  header{grid-column:1/3;padding:14px 18px;border-bottom:1px solid var(--line);background:#0d1224;display:flex;gap:12px;align-items:center}
+  header h1{font-size:18px;margin:0}
+  header .pill{padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+  .left{border-right:1px solid var(--line);background:var(--panel);padding:14px;overflow:auto}
+  .right{padding:0;overflow:hidden}
+  .section-title{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+  .module{display:block;padding:10px 12px;margin:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
+  .module.active{outline:2px solid var(--accent);background:#142042}
+  .muted{color:var(--muted)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.2)}
+  button, .btn{background:#202953;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-weight:600;cursor:pointer}
+  button:hover{filter:brightness(1.08)}
+  .row{display:grid;grid-template-columns:1.2fr .8fr;gap:0;border-top:1px solid var(--line);min-height:calc(100vh - 100px)}
+  .col{display:flex;flex-direction:column;min-height:100%}
+  .editor{flex:1;display:grid;grid-template-rows:auto 1fr}
+  textarea{width:100%;height:100%;padding:14px;border:0;outline:none;background:transparent;color:var(--ink);font:16px/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+  .panel{border-left:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto auto auto 1fr}
+  details{border-top:1px solid var(--line);padding:8px 10px}
+  summary{cursor:pointer;color:var(--accent)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;padding:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;transition:box-shadow .2s, transform .05s, outline-color .2s}
+  .card .muted{font-size:12px}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+  input,select{background:#0f1430;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid var(--line);padding:6px;vertical-align:top}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .status{font-size:12px;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .foot{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between}
+  .note{font-size:12px;color:var(--muted)}
+  canvas#map{width:100%;height:360px;background:#0c1130;border-top:1px solid var(--line)}
+  .chip{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);padding:4px 8px;border-radius:999px}
+  .kv{display:flex;gap:8px;align-items:center}
+
+  /* Active mode highlight */
+  .mode-card{position:relative}
+  .mode-card.active{
+    outline:2px solid var(--accent);
+    box-shadow:0 0 0 3px rgba(139,211,255,.15);
+    transform:translateY(-1px);
+    background:#142042;
+  }
+  .mode-card .tag{
+    position:absolute;top:8px;right:8px;
+    font-size:10px;border:1px solid var(--line);border-radius:8px;padding:2px 6px;color:var(--accent2)
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Writing for a Change • Lab</h1>
+    <span class="pill">v1 prototype</span>
+    <span class="muted">Single file. Works offline. Saves locally.</span>
+    <span class="status" id="status"></span>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button id="exportJson">Export Lab</button>
+      <button id="importJson">Import</button>
+      <input type="file" id="fileInput" accept="application/json" style="display:none" />
+    </div>
+  </header>
+
+  <aside class="left">
+    <div class="section-title">Modules</div>
+    <div id="modules"></div>
+
+    <div class="section-title">Lab Modes</div>
+    <div class="cards" id="modeCards">
+      <div class="card mode-card" id="modeSprint">
+        <b>Sprint</b>
+        <div class="muted">25 minute burst guided by prompts</div>
+        <button onclick="startSprint()">Start</button>
+      </div>
+      <div class="card mode-card" id="modeDeep">
+        <b>Deep dive</b>
+        <div class="muted">Structured drafting with checks</div>
+        <button onclick="setMode('deep')">Select</button>
+      </div>
+      <div class="card mode-card" id="modeCritique">
+        <b>Critique</b>
+        <div class="muted">Peer review rubric and lenses</div>
+        <button onclick="setMode('critique')">Select</button>
+      </div>
+    </div>
+
+    <div class="section-title">Quick actions</div>
+    <div class="grid2">
+      <button onclick="newDoc()">New draft</button>
+      <button onclick="downloadMarkdown()">Download .md</button>
+      <button onclick="togglePreview()">Toggle preview</button>
+      <button onclick="clearStorage()">Reset lab</button>
+    </div>
+
+    <div class="section-title">About</div>
+    <div class="muted">This lab hosts interactive exercises aligned with the course: narrative and social change, digital publics, power, identity, resistance, speculative futures, and method.
+    </div>
+  </aside>
+
+  <main class="right">
+    <div class="toolbar">
+      <div class="kv"><label>Module:</label>
+        <select id="moduleSelect"></select>
+      </div>
+      <div class="kv"><label>Exercise:</label>
+        <select id="exerciseSelect"></select>
+      </div>
+      <button onclick="insertPrompt()">Insert prompt</button>
+      <button onclick="insertScaffold()">Insert scaffold</button>
+      <button onclick="runChecks()">Run checks</button>
+      <span class="badge" id="saveBadge">Saved</span>
+    </div>
+
+    <div class="row">
+      <div class="col editor">
+        <div style="display:flex;gap:8px;padding:8px 10px;align-items:center;border-bottom:1px solid var(--line)">
+          <input id="title" placeholder="Draft title" style="flex:1"/>
+          <span class="muted" id="wordcount">0 words</span>
+        </div>
+        <div id="editorWrap" style="position:relative">
+          <textarea id="editor" placeholder="Write here. Use the prompts or scaffolds. Your work auto-saves in this browser."></textarea>
+          <div id="preview" style="display:none;padding:14px"></div>
+        </div>
+        <div class="foot">
+          <div class="note">Tips: use Cmd or Ctrl S to save. Checks highlight issues based on selected lenses.</div>
+          <div class="chip"><input type="checkbox" id="liveLint"/><label for="liveLint">Live checks</label></div>
+        </div>
+      </div>
+
+      <div class="col panel">
+        <details open>
+          <summary>Rhetorical lenses</summary>
+          <div class="cards" id="lenses"></div>
+        </details>
+
+        <details open>
+          <summary>Evidence matrix</summary>
+          <div style="padding:8px 10px">
+            <div class="grid3" style="margin-bottom:8px">
+              <input id="ev_claim" placeholder="Claim"/>
+              <input id="ev_source" placeholder="Source or link"/>
+              <input id="ev_note" placeholder="Note"/>
+            </div>
+            <button onclick="addEvidence()">Add</button>
+            <button onclick="exportEvidence()">Export CSV</button>
+          </div>
+          <div style="max-height:180px;overflow:auto">
+            <table id="ev_table"><thead><tr><th>Claim</th><th>Source</th><th>Note</th><th></th></tr></thead><tbody></tbody></table>
+          </div>
+        </details>
+
+        <details>
+          <summary>Argument map</summary>
+          <div style="padding:8px 10px" class="grid3">
+            <input id="nodeLabel" placeholder="Node label"/>
+            <select id="nodeType">
+              <option>Claim</option><option>Reason</option><option>Evidence</option><option>Counter</option>
+            </select>
+            <button onclick="addNode()">Add node</button>
+            <select id="edgeFrom"></select>
+            <select id="edgeTo"></select>
+            <button onclick="addEdge()">Link</button>
+          </div>
+          <canvas id="map" width="800" height="360"></canvas>
+          <div class="foot">
+            <div class="note">Drag nodes. Export as PNG for submissions.</div>
+            <div>
+              <button onclick="exportMap()">Export PNG</button>
+              <button onclick="clearMap()">Clear</button>
+            </div>
+          </div>
+        </details>
+
+        <details>
+          <summary>Rubric</summary>
+          <div class="cards">
+            <div class="card"><b>Purpose</b><div class="muted">Clear theory of change. Audience and outcome are explicit.</div></div>
+            <div class="card"><b>Evidence</b><div class="muted">Claims trace to sources. Counterpoints engaged in good faith.</div></div>
+            <div class="card"><b>Ethics</b><div class="muted">Privacy, consent, and harm audit completed.</div></div>
+            <div class="card"><b>Craft</b><div class="muted">Structure, rhythm, and readability.</div></div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ---------- Course data ----------
+const COURSE = {
+  modules: [
+    { id:'narrative-change', title:'Narrative as social change',
+      exercises:[
+        {id:'power-map', label:'Power and narrative map', prompt:`Map the change you seek in 3 moves. Who needs to see or feel what, for what to change. Identify gatekeepers, allies, and audiences.`},
+        {id:'story-of-now', label:'Story of Now', prompt:`Write 150 words linking a present urgency to a concrete action. Use a human subject, a specific scene, and a measurable ask.`}
+      ],
+      scaffold:`Title
+One-line thesis about the change
+
+Scene
+Describe a concrete scene where the issue is visible.
+
+Mechanism
+Explain how your narrative will shift incentives, beliefs, or norms.
+
+Action
+What should the reader do in the next 24 hours.`
+    },
+    { id:'digital-publics', title:'Digital publics and infrastructure',
+      exercises:[
+        {id:'platform-audit', label:'Platform affordance audit', prompt:`Choose a platform. List 5 affordances that shape who speaks, who sees, and what spreads. Draft one design tweak and its civic effect.`},
+        {id:'attention-ethics', label:'Attention ethics', prompt:`Diagnose how your draft handles boredom, friction, and choice architecture. Add one intentional pause to protect attention.`}
+      ],
+      scaffold:`Channel strategy
+Pick one channel and justify with audience, norms, and risk.
+
+Tactic
+State one tactic per channel and its testable metric.`
+    },
+    { id:'power-identity', title:'Narrative, power, identity',
+      exercises:[
+        {id:'frame-flip', label:'Frame flip', prompt:`Rewrite your core claim from an opponent's strongest frame. Steelman it, then answer with evidence and values.`},
+        {id:'positionality', label:'Positionality note', prompt:`In 80 words, disclose your standpoint. Name what you know first-hand, what you infer, and what you are unsure about.`}
+      ],
+      scaffold:`Stakeholders
+List 3 groups. State interests, harms, and gains.
+
+Equity
+Note whose risks are higher and how you address them.`
+    },
+    { id:'resistance', title:'Resistance and repair',
+      exercises:[
+        {id:'micro-intervention', label:'Micro intervention', prompt:`Design a 7-day micro intervention a reader can do. Include friction points, default traps, and how to measure progress.`},
+        {id:'repair-story', label:'Repair story', prompt:`Tell a 200 word story of repair where something broken was made usable again. Focus on process and small wins.`}
+      ],
+      scaffold:`Problem
+Describe a concrete harm.
+
+Repair plan
+Steps, actors, materials, and checkpoints.
+
+Feedback
+How you will learn and adapt.`
+    },
+    { id:'futures', title:'Speculative futures',
+      exercises:[
+        {id:'future-canvas', label:'Near future vignette', prompt:`Write a 250 word vignette 3 years ahead. Show one changed institution and one unchanged habit. Avoid jargon.`},
+        {id:'backcast', label:'Backcasting chain', prompt:`Define a desirable end state, then list 5 backward steps to reach it. Each step must be observable and realistic.`}
+      ],
+      scaffold:`World
+What has changed, for whom.
+
+Path
+Backcast 5 milestones from end to now.
+
+Ethics
+Name one risk and one guardrail.`
+    },
+    { id:'method', title:'Method and measurement',
+      exercises:[
+        {id:'claim-check', label:'Claim check', prompt:`Underline every claim. For each, add source quality and a check method. Delete uncheckable claims or rephrase.`},
+        {id:'metric', label:'Metric design', prompt:`Choose one outcome. Define an indicator, data source, and a 2 week test.`}
+      ],
+      scaffold:`Causal path
+If X then Y, because Z. Note assumptions.
+
+Measurement
+Indicator, data source, time frame, and threshold.`
+    }
+  ],
+  lenses:[
+    {id:'agency', title:'Agency and autonomy', hint:'Does the draft expand meaningful choice without manipulation'},
+    {id:'evidence', title:'Evidence traceability', hint:'Every claim links to a source or method'},
+    {id:'equity', title:'Equity and risk', hint:'Risks are not offloaded to the least powerful'},
+    {id:'attention', title:'Attention and friction', hint:'Built-in pauses and consent to engage'},
+    {id:'counter', title:'Counterarguments', hint:'Strongest objections are addressed'},
+    {id:'readability', title:'Readability', hint:'Short sentences, concrete nouns, active verbs'}
+  ]
+};
+
+// ---------- State ----------
+let state = {
+  mode:'deep',
+  currentModule:'narrative-change',
+  currentExercise:'power-map',
+  draft:{title:'', body:''},
+  evidence:[],
+  map:{nodes:[], edges:[]}
+};
+
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+function save(){
+  localStorage.setItem('wfac_lab_v1', JSON.stringify(state));
+  const b = $('#saveBadge'); b.textContent = 'Saved'; b.style.borderColor = '#2e7';
+}
+function load(){
+  const raw = localStorage.getItem('wfac_lab_v1');
+  if(raw){ state = JSON.parse(raw); }
+}
+
+// ---------- UI init ----------
+function init(){
+  load();
+  buildModules();
+  buildSelectors();
+  buildLenses();
+  bindEditor();
+  renderEvidence();
+  renderMap();
+  updateWordcount();
+  applyMode(); // ensure mode effects and highlights on first load
+  $('#status').textContent = 'Local autosave on';
+}
+
+function buildModules(){
+  const box = $('#modules'); box.innerHTML='';
+  COURSE.modules.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'module' + (state.currentModule===m.id?' active':'');
+    div.innerHTML = `<b>${m.title}</b><div class="muted">${m.exercises.length} exercises</div>`;
+    div.onclick = ()=>{ state.currentModule = m.id; state.currentExercise = m.exercises[0].id; save(); buildModules(); buildSelectors(); };
+    box.appendChild(div);
+  });
+}
+function buildSelectors(){
+  const modSel = $('#moduleSelect'); const exSel = $('#exerciseSelect');
+  const mod = COURSE.modules.find(x => x.id===state.currentModule) || COURSE.modules[0];
+  modSel.innerHTML = COURSE.modules.map(m=>`<option value="${m.id}" ${m.id===mod.id?'selected':''}>${m.title}</option>`).join('');
+  exSel.innerHTML = mod.exercises.map(e=>`<option value="${e.id}" ${e.id===state.currentExercise?'selected':''}>${e.label}</option>`).join('');
+  modSel.onchange = e=>{ state.currentModule = e.target.value; const m = COURSE.modules.find(x=>x.id===state.currentModule); state.currentExercise = m.exercises[0].id; save(); buildSelectors(); };
+  exSel.onchange = e=>{ state.currentExercise = e.target.value; save(); };
+  buildNodeSelectors();
+}
+function buildLenses(){
+  const box = $('#lenses'); box.innerHTML='';
+  COURSE.lenses.forEach(l => {
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div>
+        <b>${l.title}</b>
+        <div class="muted" style="font-size:12px">${l.hint}</div>
+      </div>
+      <div class="chip"><input type="checkbox" data-lens="${l.id}" class="lensBox"/><label style="margin-left:6px">On</label></div>
+    </div>`;
+    box.appendChild(card);
+  });
+  $$('.lensBox').forEach(cb=>cb.onchange = ()=>{ if($('#liveLint').checked) runChecks(); });
+}
+
+function bindEditor(){
+  $('#title').value = state.draft.title || '';
+  $('#editor').value = state.draft.body || '';
+  $('#title').oninput = e=>{ state.draft.title = e.target.value; save(); };
+  $('#editor').oninput = e=>{ state.draft.body = e.target.value; updateWordcount(); if($('#liveLint').checked) runChecks(); save(); };
+  document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); save(); }});
+}
+
+function insertPrompt(){
+  const m = COURSE.modules.find(x=>x.id===state.currentModule);
+  const ex = m.exercises.find(x=>x.id===state.currentExercise);
+  appendToEditor(`\n\n> Prompt: ${ex.prompt}\n`);
+}
+function insertScaffold(){
+  const m = COURSE.modules.find(x=>x.id===state.currentModule);
+  appendToEditor(`\n\n${m.scaffold}\n`);
+}
+function appendToEditor(txt){
+  const ed = $('#editor'); const start = ed.selectionStart ?? ed.value.length;
+  ed.setRangeText(txt, start, start, 'end'); ed.dispatchEvent(new Event('input'));
+}
+
+function togglePreview(){
+  const prev = $('#preview'); const ed = $('#editor');
+  if(prev.style.display==='none'){ prev.style.display='block'; ed.style.display='none'; prev.innerHTML = renderMarkdown(ed.value); }
+  else { prev.style.display='none'; ed.style.display='block'; }
+}
+
+function renderMarkdown(md){
+  let html = md
+    .replace(/^# (.*$)/gim,'<h1>$1</h1>')
+    .replace(/^## (.*$)/gim,'<h2>$1</h2>')
+    .replace(/^### (.*$)/gim,'<h3>$1</h3>')
+    .replace(/^> (.*$)/gim,'<blockquote>$1</blockquote>')
+    .replace(/\*\*(.*)\*\*/gim,'<b>$1</b>')
+    .replace(/\*(.*)\*/gim,'<i>$1</i>')
+    .replace(/`([^`]+)`/gim,'<code>$1</code>')
+    .replace(/\n/g,'<br/>');
+  return html;
+}
+
+function updateWordcount(){
+  const text = $('#editor').value.trim();
+  const words = text? text.split(/\s+/).length:0;
+  $('#wordcount').textContent = words + ' words';
+}
+
+// ---------- Checks ----------
+function runChecks(){
+  const text = $('#editor').value;
+  const active = $$('.lensBox').filter(x=>x.checked).map(x=>x.dataset.lens);
+  let notes = [];
+  if(active.includes('readability')){
+    const long = text.split(/[.!?]/).filter(s=>s.split(/\s+/).length>28).length;
+    if(long>0) notes.push(`${long} very long sentences. Aim for under 25 words.`);
+  }
+  if(active.includes('evidence')){
+    const claims = (text.match(/\b(should|must|will|proves|shows|demonstrates)\b/gi)||[]).length;
+    if(claims>0 && state.evidence.length < Math.min(3, claims)) notes.push('Add more sources to match claims.');
+  }
+  if(active.includes('counter')){
+    if(!/counter|objection|however|critique|steelman/i.test(text)) notes.push('Add and answer at least one strong objection.');
+  }
+  if(active.includes('attention')){
+    if(!/pause|break|breathe|step away|timer/i.test(text)) notes.push('Add an intentional pause to respect attention.');
+  }
+  if(active.includes('agency')){
+    if(!/choice|autonomy|consent|opt|voluntary/i.test(text)) notes.push('Make the locus of choice explicit.');
+  }
+  if(active.includes('equity')){
+    if(!/risk|burden|access|cost|barrier|marginal/i.test(text)) notes.push('Discuss risk distribution and mitigations.');
+  }
+  const msg = notes.length? 'Issues: ' + notes.join(' ') : 'No issues found with current lenses.';
+  $('#saveBadge').textContent = msg; $('#saveBadge').style.borderColor = notes.length? '#f6a' : '#2e7';
+}
+
+// ---------- Evidence ----------
+function addEvidence(){
+  const c = $('#ev_claim').value.trim(); const s = $('#ev_source').value.trim(); const n = $('#ev_note').value.trim();
+  if(!c||!s) return;
+  state.evidence.push({c,s,n});
+  $('#ev_claim').value=''; $('#ev_source').value=''; $('#ev_note').value='';
+  renderEvidence(); save();
+}
+function removeEvidence(i){ state.evidence.splice(i,1); renderEvidence(); save(); }
+function renderEvidence(){
+  const tbody = $('#ev_table tbody'); tbody.innerHTML='';
+  state.evidence.forEach((row,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(row.c)}</td><td>${esc(row.s)}</td><td>${esc(row.n||'')}</td>
+      <td><button onclick="removeEvidence(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function exportEvidence(){
+  const header = 'Claim,Source,Note\n';
+  const rows = state.evidence.map(r=>`"${r.c.replace(/"/g,'""')}","${r.s.replace(/"/g,'""')}","${(r.n||'').replace(/"/g,'""')}"`).join('\n');
+  const csv = header + rows; downloadFile('evidence.csv', csv, 'text/csv');
+}
+
+// ---------- Argument map ----------
+let dragId = null;
+function addNode(){
+  const label = $('#nodeLabel').value.trim(); if(!label) return;
+  const type = $('#nodeType').value;
+  const id = 'n'+(Date.now()+Math.random()).toString(36).slice(2,7);
+  state.map.nodes.push({id,label,type,x:100+Math.random()*400,y:100+Math.random()*120});
+  $('#nodeLabel').value='';
+  renderMap(); buildNodeSelectors(); save();
+}
+function addEdge(){
+  const from = $('#edgeFrom').value; const to = $('#edgeTo').value; if(!from||!to||from===to) return;
+  state.map.edges.push({from,to}); renderMap(); save();
+}
+function buildNodeSelectors(){
+  const opts = state.map.nodes.map(n=>`<option value="${n.id}">${n.label}</option>`).join('');
+  $('#edgeFrom').innerHTML = opts; $('#edgeTo').innerHTML = opts;
+}
+function clearMap(){ state.map={nodes:[],edges:[]}; renderMap(); buildNodeSelectors(); save(); }
+
+function renderMap(){
+  const canvas = $('#map'); const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // edges
+  ctx.lineWidth = 1.2; ctx.strokeStyle = '#6b76b6';
+  state.map.edges.forEach(e=>{
+    const a = state.map.nodes.find(n=>n.id===e.from); const b = state.map.nodes.find(n=>n.id===e.to);
+    if(!a||!b) return; drawArrow(ctx, a.x, a.y, b.x, b.y);
+  });
+  // nodes
+  state.map.nodes.forEach(n=>{
+    const {x,y} = n;
+    const r = 12;
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle = colorFor(n.type); ctx.fill(); ctx.strokeStyle = '#1e2346'; ctx.stroke();
+    ctx.fillStyle = '#e9ecff'; ctx.font = '12px system-ui'; ctx.textAlign = 'left'; ctx.fillText(n.label, x+16, y+4);
+  });
+}
+function colorFor(type){
+  return type==='Claim'? '#3e5fff' : type==='Reason'? '#23c88b' : type==='Evidence'? '#c48bff' : '#ff6e91';
+}
+function drawArrow(ctx,x1,y1,x2,y2){
+  const angle = Math.atan2(y2-y1,x2-x1); const len = Math.hypot(x2-x1,y2-y1);
+  const head = 8; const back = len - head;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1 + Math.cos(angle)*back, y1 + Math.sin(angle)*back); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(x2 - head*Math.cos(angle - Math.PI/6), y2 - head*Math.sin(angle - Math.PI/6));
+  ctx.lineTo(x2 - head*Math.cos(angle + Math.PI/6), y2 - head*Math.sin(angle + Math.PI/6));
+  ctx.closePath(); ctx.fillStyle = '#6b76b6'; ctx.fill();
+}
+$('#map').addEventListener('mousedown', e=>{
+  const rect = e.target.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+  dragId = hitNode(x,y);
+});
+window.addEventListener('mousemove', e=>{
+  if(!dragId) return; const canvas = $('#map'); const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+  const n = state.map.nodes.find(n=>n.id===dragId); if(n){ n.x = Math.max(10, Math.min(canvas.width-10, x)); n.y = Math.max(10, Math.min(canvas.height-10, y)); renderMap(); }
+});
+window.addEventListener('mouseup', ()=>{ if(dragId){ dragId=null; save(); }});
+function hitNode(x,y){
+  for(const n of state.map.nodes){ if(Math.hypot(n.x-x,n.y-y) < 14) return n.id; } return null;
+}
+function exportMap(){ const c = $('#map'); const link = document.createElement('a'); link.download = 'argument-map.png'; link.href = c.toDataURL('image/png'); link.click(); }
+
+// ---------- Mode helpers ----------
+function setMode(m){
+  state.mode = m; save();
+  applyMode();
+}
+function applyMode(){
+  // Visual feedback in badge
+  const badge = $('#saveBadge');
+
+  if(state.mode==='deep'){
+    checkLens('agency', true);
+    checkLens('evidence', true);
+    checkLens('readability', true);
+    checkLens('counter', false);
+    checkLens('attention', true);
+    checkLens('equity', true);
+    $('#liveLint').checked = true;
+    if(!state.draft.body || state.draft.body.trim().length===0){ insertScaffold(); }
+    badge.textContent = 'Deep dive mode on: drafting lenses active';
+  } else if(state.mode==='critique'){
+    checkLens('counter', true);
+    checkLens('equity', true);
+    checkLens('readability', true);
+    checkLens('evidence', true);
+    checkLens('attention', false);
+    checkLens('agency', false);
+    $('#liveLint').checked = true;
+    if(!/Critique checklist:/i.test($('#editor').value)){
+      appendToEditor('\n\nCritique checklist:\n- Purpose clear and specific?\n- Claims traced to sources?\n- Strongest objection engaged?\n- Risks equitably handled?\n- Sentences concise and concrete?\n');
+    }
+    // Open rubric for review
+    $$('details').forEach(d=>{ if(d.querySelector('summary') && /Rubric/i.test(d.querySelector('summary').textContent)){ d.open = true; }});
+    badge.textContent = 'Critique mode on: review lenses active';
+  } else if(state.mode==='sprint'){
+    checkLens('readability', true);
+    checkLens('evidence', false);
+    checkLens('counter', false);
+    checkLens('equity', false);
+    checkLens('attention', false);
+    checkLens('agency', false);
+    $('#liveLint').checked = false;
+    badge.textContent = 'Sprint mode on: write first, edit later';
+  }
+
+  highlightModeCards();
+  runChecks();
+}
+function highlightModeCards(){
+  $$('.mode-card').forEach(c=>c.classList.remove('active'));
+  if(state.mode==='deep') $('#modeDeep').classList.add('active');
+  else if(state.mode==='critique') $('#modeCritique').classList.add('active');
+  else if(state.mode==='sprint') $('#modeSprint').classList.add('active');
+
+  // add a small tag
+  $$('.mode-card .tag').forEach(t=>t.remove());
+  const map = {sprint:'Sprint on', deep:'Deep dive on', critique:'Critique on'};
+  const activeCard =
+    state.mode==='deep' ? $('#modeDeep') :
+    state.mode==='critique' ? $('#modeCritique') :
+    $('#modeSprint');
+  const tag = document.createElement('span');
+  tag.className='tag'; tag.textContent = map[state.mode];
+  activeCard.appendChild(tag);
+}
+function checkLens(id, on){
+  const cb = document.querySelector(`.lensBox[data-lens="${id}"]`);
+  if(cb) { cb.checked = !!on; }
+}
+function startSprint(){
+  setMode('sprint');
+  const m = COURSE.modules[Math.floor(Math.random()*COURSE.modules.length)];
+  state.currentModule = m.id; state.currentExercise = m.exercises[Math.floor(Math.random()*m.exercises.length)].id;
+  save(); buildModules(); buildSelectors(); insertPrompt();
+  alert('Sprint started. 25 minutes. Write without editing.');
+  $('#saveBadge').textContent = 'Sprint mode on: timer running';
+}
+
+// ---------- Export, import, files ----------
+function downloadMarkdown(){
+  const md = `# ${state.draft.title||'Untitled'}\n\n${state.draft.body}`;
+  downloadFile('draft.md', md, 'text/markdown');
+}
+function exportState(){ downloadFile('wfac_lab.json', JSON.stringify(state,null,2), 'application/json'); }
+function downloadFile(name, content, mime){
+  const blob = new Blob([content],{type:mime}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500);
+}
+$('#exportJson').onclick = exportState;
+$('#importJson').onclick = ()=>$('#fileInput').click();
+$('#fileInput').onchange = e=>{
+  const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+  reader.onload = ev=>{ try{ state = JSON.parse(ev.target.result); save(); location.reload(); }catch(err){ alert('Bad file'); } };
+  reader.readAsText(file);
+};
+
+function clearStorage(){ if(confirm('Clear all lab data in this browser')){ localStorage.removeItem('wfac_lab_v1'); location.reload(); } }
+
+function newDoc(){ state.draft={title:'', body:''}; $('#title').value=''; $('#editor').value=''; updateWordcount(); save(); }
+
+function esc(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---------- Boot ----------
+init();
+</script>
+</body>
+</html>
