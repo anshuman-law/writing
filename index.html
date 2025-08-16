@@ -8,142 +8,136 @@
   :root{
     --bg:#0f1220; --panel:#151930; --ink:#e9ecff; --muted:#a7b0d6; --accent:#8bd3ff; --accent2:#baffc9; --warn:#ffd166;
     --ok:#95f29b; --bad:#ff99ad; --card:#191f3d; --line:#2a3056;
+    --tap:44px; --sidebar:300px;
   }
-  *{box-sizing:border-box}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   html,body{height:100%}
-  body{margin:0;background:linear-gradient(180deg,#0b0f1a,#141a33 60%,#0b0f1a);color:var(--ink);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-  a{color:var(--accent)}
-  .app{display:grid;grid-template-columns:280px 1fr;grid-template-rows:auto 1fr;min-height:100vh}
-  header{grid-column:1/3;padding:14px 18px;border-bottom:1px solid var(--line);background:#0d1224;display:flex;gap:12px;align-items:center}
-  header h1{font-size:18px;margin:0}
-  header .pill{padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-  .left{border-right:1px solid var(--line);background:var(--panel);padding:14px;overflow:auto}
-  .right{padding:0;overflow:hidden}
-  .section-title{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+  body{margin:0;background:linear-gradient(180deg,#0b0f1a,#141a33 60%,#0b0f1a);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
+
+  /* Shell */
+  .app{display:grid;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+  header{grid-column:1/3;display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:#0d1224;position:sticky;top:0;z-index:60}
+  header h1{font-size:18px;margin:0;white-space:nowrap}
+  .muted{color:var(--muted)}
+  .pill{border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--muted);font-size:12px}
+  .spacer{flex:1}
+  .iconbtn, button{background:#202953;color:var(--ink);border:1px solid var(--line);border-radius:10px;min-height:var(--tap);padding:8px 10px;cursor:pointer}
+  .iconbtn{display:inline-grid;place-items:center;min-width:var(--tap);padding:0}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.22);position:sticky;top:52px;z-index:50}
+  .kv{display:flex;align-items:center;gap:8px}
+  input,select,textarea{background:#0f1430;color:var(--ink);border:1px solid var(--line);border-radius:10px;min-height:var(--tap);padding:10px}
+  textarea{width:100%;height:44vh;resize:vertical}
+  .badge{display:inline-block;font-size:12px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
+
+  /* Sidebar */
+  aside.left{border-right:1px solid var(--line);background:var(--panel);padding:10px;overflow:auto}
+  .section-title{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:8px 2px}
   .module{display:block;padding:10px 12px;margin:4px 0;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
   .module.active{outline:2px solid var(--accent);background:#142042}
-  .muted{color:var(--muted)}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border-bottom:1px solid var(--line);background:rgba(0,0,0,.2)}
-  button, .btn{background:#202953;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-weight:600;cursor:pointer}
-  button:hover{filter:brightness(1.08)}
-  .row{display:grid;grid-template-columns:1.2fr .8fr;gap:0;border-top:1px solid var(--line);min-height:calc(100vh - 100px)}
-  .col{display:flex;flex-direction:column;min-height:100%}
-  .editor{flex:1;display:grid;grid-template-rows:auto 1fr}
-  textarea{width:100%;height:100%;padding:14px;border:0;outline:none;background:transparent;color:var(--ink);font:16px/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-  .panel{border-left:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto auto auto 1fr}
-  details{border-top:1px solid var(--line);padding:8px 10px}
-  summary{cursor:pointer;color:var(--accent)}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;padding:10px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;transition:box-shadow .2s, transform .05s, outline-color .2s}
-  .card .muted{font-size:12px}
-  .badge{display:inline-block;font-size:11px;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}
-  input,select{background:#0f1430;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;padding:8px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;transition:box-shadow .15s, transform .05s}
+  .card.active{outline:2px solid var(--accent);background:#142042;box-shadow:0 0 0 3px rgba(139,211,255,.12)}
+  .mode-card{position:relative}
+  .mode-card .tag{position:absolute;top:8px;right:8px;font-size:10px;border:1px solid var(--line);border-radius:8px;padding:2px 6px;color:var(--accent2)}
+
+  /* Right column layout */
+  .row{display:grid;grid-template-columns:1.1fr .9fr;min-height:calc(100vh - 110px)}
+  .col{display:flex;flex-direction:column}
+  .panel{border-left:1px solid var(--line);background:var(--panel);display:grid;grid-template-rows:auto auto auto 1fr;overflow:auto}
+  details{border-top:1px solid var(--line)}
+  details > summary{cursor:pointer;color:var(--accent);padding:10px}
+  .pad{padding:10px}
+
   table{width:100%;border-collapse:collapse}
   th,td{border:1px solid var(--line);padding:6px;vertical-align:top}
-  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
-  .status{font-size:12px;color:var(--muted)}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-  .foot{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;justify-content:space-between}
-  .note{font-size:12px;color:var(--muted)}
-  canvas#map{width:100%;height:360px;background:#0c1130;border-top:1px solid var(--line)}
-  .chip{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);padding:4px 8px;border-radius:999px}
-  .kv{display:flex;gap:8px;align-items:center}
 
-  /* Active mode highlight */
-  .mode-card{position:relative}
-  .mode-card.active{
-    outline:2px solid var(--accent);
-    box-shadow:0 0 0 3px rgba(139,211,255,.15);
-    transform:translateY(-1px);
-    background:#142042;
+  canvas#map{width:100%;height:320px;background:#0c1130;border-top:1px solid var(--line)}
+
+  /* Mobile: drawer sidebar, stacked content, larger hit areas */
+  .drawer-toggle{display:none}
+  .backdrop{display:none}
+  @media (max-width: 900px){
+    .app{grid-template-columns:1fr}
+    aside.left{position:fixed;inset:0 auto 0 0;width:min(86vw,360px);max-width:86vw;transform:translateX(-100%);transition:transform .2s ease;z-index:70;box-shadow:10px 0 30px rgba(0,0,0,.35)}
+    aside.left.open{transform:translateX(0)}
+    .drawer-toggle{display:inline-grid}
+    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:saturate(130%) blur(2px);z-index:65}
+    .backdrop.hide{display:none}
+    .backdrop.show{display:block}
+    .cards{grid-template-columns:1fr}
+    .row{grid-template-columns:1fr}
+    .panel{border-left:none;border-top:1px solid var(--line)}
+    .toolbar{top:52px}
+    textarea{height:36vh}
   }
-  .mode-card .tag{
-    position:absolute;top:8px;right:8px;
-    font-size:10px;border:1px solid var(--line);border-radius:8px;padding:2px 6px;color:var(--accent2)
+  /* Motion accessibility */
+  @media (prefers-reduced-motion: reduce){
+    aside.left{transition:none}
+    .card{transition:none}
   }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
+    <button id="toggleNav" class="iconbtn drawer-toggle" aria-label="Menu" title="Menu">≡</button>
     <h1>Writing for a Change • Lab</h1>
-    <span class="pill">v1 prototype</span>
-    <span class="muted">Single file. Works offline. Saves locally.</span>
-    <span class="status" id="status"></span>
-    <div style="margin-left:auto;display:flex;gap:8px">
-      <button id="exportJson">Export Lab</button>
-      <button id="importJson">Import</button>
-      <input type="file" id="fileInput" accept="application/json" style="display:none" />
-    </div>
+    <span class="pill" id="modePill">Deep</span>
+    <span class="muted">Single file. Autosaves locally.</span>
+    <span class="spacer"></span>
+    <span class="badge" id="status">Ready</span>
+    <button id="exportJson" class="iconbtn" title="Export">⤓</button>
+    <button id="importJson" class="iconbtn" title="Import">⤒</button>
+    <input type="file" id="fileInput" accept="application/json" style="display:none" />
   </header>
 
-  <aside class="left">
-    <div class="section-title">Modules</div>
-    <div id="modules"></div>
-
+  <aside class="left" id="sidebar" aria-label="Navigation">
     <div class="section-title">Lab Modes</div>
     <div class="cards" id="modeCards">
-      <div class="card mode-card" id="modeSprint">
-        <b>Sprint</b>
-        <div class="muted">25 minute burst guided by prompts</div>
-        <button onclick="startSprint()">Start</button>
-      </div>
-      <div class="card mode-card" id="modeDeep">
-        <b>Deep dive</b>
-        <div class="muted">Structured drafting with checks</div>
-        <button onclick="setMode('deep')">Select</button>
-      </div>
-      <div class="card mode-card" id="modeCritique">
-        <b>Critique</b>
-        <div class="muted">Peer review rubric and lenses</div>
-        <button onclick="setMode('critique')">Select</button>
-      </div>
+      <div class="card mode-card" id="modeSprint"><b>Sprint</b><div class="muted">25 minute burst guided by prompts</div><button onclick="startSprint()">Start</button></div>
+      <div class="card mode-card" id="modeDeep"><b>Deep dive</b><div class="muted">Structured drafting with checks</div><button onclick="setMode('deep')">Select</button></div>
+      <div class="card mode-card" id="modeCritique"><b>Critique</b><div class="muted">Peer review rubric and lenses</div><button onclick="setMode('critique')">Select</button></div>
     </div>
+
+    <div class="section-title">Modules</div>
+    <div id="modules" class="pad"></div>
 
     <div class="section-title">Quick actions</div>
-    <div class="grid2">
-      <button onclick="newDoc()">New draft</button>
-      <button onclick="downloadMarkdown()">Download .md</button>
-      <button onclick="togglePreview()">Toggle preview</button>
-      <button onclick="clearStorage()">Reset lab</button>
-    </div>
-
-    <div class="section-title">About</div>
-    <div class="muted">This lab hosts interactive exercises aligned with the course: narrative and social change, digital publics, power, identity, resistance, speculative futures, and method.
+    <div class="cards">
+      <div class="card"><b>New draft</b><div class="muted">Start fresh</div><button onclick="newDoc()">Create</button></div>
+      <div class="card"><b>Download</b><div class="muted">Save .md</div><button onclick="downloadMarkdown()">Download .md</button></div>
+      <div class="card"><b>Toggle preview</b><div class="muted">Markdown preview</div><button onclick="togglePreview()">Preview</button></div>
+      <div class="card"><b>Reset</b><div class="muted">Clear local data</div><button onclick="clearStorage()">Reset lab</button></div>
     </div>
   </aside>
 
   <main class="right">
+    <!-- Top controls -->
     <div class="toolbar">
-      <div class="kv"><label>Module:</label>
-        <select id="moduleSelect"></select>
-      </div>
-      <div class="kv"><label>Exercise:</label>
-        <select id="exerciseSelect"></select>
-      </div>
+      <div class="kv"><label>Module</label><select id="moduleSelect"></select></div>
+      <div class="kv"><label>Exercise</label><select id="exerciseSelect"></select></div>
       <button onclick="insertPrompt()">Insert prompt</button>
       <button onclick="insertScaffold()">Insert scaffold</button>
       <button onclick="runChecks()">Run checks</button>
       <span class="badge" id="saveBadge">Saved</span>
     </div>
 
+    <!-- Stacked content that collapses nicely on phones -->
     <div class="row">
-      <div class="col editor">
-        <div style="display:flex;gap:8px;padding:8px 10px;align-items:center;border-bottom:1px solid var(--line)">
-          <input id="title" placeholder="Draft title" style="flex:1"/>
+      <!-- Editor -->
+      <div class="col">
+        <div class="pad" style="border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="title" placeholder="Draft title" style="flex:1 1 260px"/>
           <span class="muted" id="wordcount">0 words</span>
+          <label class="kv" style="margin-left:auto"><input type="checkbox" id="liveLint" style="margin-right:8px"/>Live checks</label>
         </div>
-        <div id="editorWrap" style="position:relative">
-          <textarea id="editor" placeholder="Write here. Use the prompts or scaffolds. Your work auto-saves in this browser."></textarea>
-          <div id="preview" style="display:none;padding:14px"></div>
-        </div>
-        <div class="foot">
-          <div class="note">Tips: use Cmd or Ctrl S to save. Checks highlight issues based on selected lenses.</div>
-          <div class="chip"><input type="checkbox" id="liveLint"/><label for="liveLint">Live checks</label></div>
+        <div id="editorWrap" class="pad" style="position:relative">
+          <textarea id="editor" placeholder="Write here. Prompts and scaffolds insert from the toolbar."></textarea>
+          <div id="preview" style="display:none;padding:6px 0"></div>
         </div>
       </div>
 
+      <!-- Tools panel becomes a stacked accordion on mobile -->
       <div class="col panel">
         <details open>
           <summary>Rhetorical lenses</summary>
@@ -152,36 +146,36 @@
 
         <details open>
           <summary>Evidence matrix</summary>
-          <div style="padding:8px 10px">
-            <div class="grid3" style="margin-bottom:8px">
+          <div class="pad">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
               <input id="ev_claim" placeholder="Claim"/>
               <input id="ev_source" placeholder="Source or link"/>
               <input id="ev_note" placeholder="Note"/>
             </div>
-            <button onclick="addEvidence()">Add</button>
-            <button onclick="exportEvidence()">Export CSV</button>
+            <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+              <button onclick="addEvidence()">Add</button>
+              <button onclick="exportEvidence()">Export CSV</button>
+            </div>
           </div>
-          <div style="max-height:180px;overflow:auto">
+          <div style="max-height:200px;overflow:auto" class="pad">
             <table id="ev_table"><thead><tr><th>Claim</th><th>Source</th><th>Note</th><th></th></tr></thead><tbody></tbody></table>
           </div>
         </details>
 
         <details>
           <summary>Argument map</summary>
-          <div style="padding:8px 10px" class="grid3">
+          <div class="pad" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <input id="nodeLabel" placeholder="Node label"/>
-            <select id="nodeType">
-              <option>Claim</option><option>Reason</option><option>Evidence</option><option>Counter</option>
-            </select>
+            <select id="nodeType"><option>Claim</option><option>Reason</option><option>Evidence</option><option>Counter</option></select>
             <button onclick="addNode()">Add node</button>
             <select id="edgeFrom"></select>
             <select id="edgeTo"></select>
             <button onclick="addEdge()">Link</button>
           </div>
-          <canvas id="map" width="800" height="360"></canvas>
-          <div class="foot">
-            <div class="note">Drag nodes. Export as PNG for submissions.</div>
-            <div>
+          <div class="pad"><canvas id="map" width="800" height="360"></canvas></div>
+          <div class="pad" style="display:flex;gap:8px;justify-content:space-between;align-items:center;border-top:1px solid var(--line)">
+            <div class="muted">Drag nodes. Export as PNG for submissions.</div>
+            <div style="display:flex;gap:8px">
               <button onclick="exportMap()">Export PNG</button>
               <button onclick="clearMap()">Clear</button>
             </div>
@@ -191,19 +185,20 @@
         <details>
           <summary>Rubric</summary>
           <div class="cards">
-            <div class="card"><b>Purpose</b><div class="muted">Clear theory of change. Audience and outcome are explicit.</div></div>
-            <div class="card"><b>Evidence</b><div class="muted">Claims trace to sources. Counterpoints engaged in good faith.</div></div>
+            <div class="card"><b>Purpose</b><div class="muted">Clear theory of change. Audience and outcome explicit.</div></div>
+            <div class="card"><b>Evidence</b><div class="muted">Claims trace to sources. Counterpoints in good faith.</div></div>
             <div class="card"><b>Ethics</b><div class="muted">Privacy, consent, and harm audit completed.</div></div>
-            <div class="card"><b>Craft</b><div class="muted">Structure, rhythm, and readability.</div></div>
+            <div class="card"><b>Craft</b><div class="muted">Structure, rhythm, readability.</div></div>
           </div>
         </details>
       </div>
     </div>
   </main>
 </div>
+<div class="backdrop hide" id="backdrop" onclick="closeDrawer()" aria-hidden="true"></div>
 
 <script>
-// ---------- Course data ----------
+/* ---------- Course data ---------- */
 const COURSE = {
   modules: [
     { id:'narrative-change', title:'Narrative as social change',
@@ -295,7 +290,7 @@ Indicator, data source, time frame, and threshold.`
   ]
 };
 
-// ---------- State ----------
+/* ---------- State ---------- */
 let state = {
   mode:'deep',
   currentModule:'narrative-change',
@@ -305,19 +300,20 @@ let state = {
   map:{nodes:[], edges:[]}
 };
 
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
 
+/* ---------- Storage ---------- */
 function save(){
   localStorage.setItem('wfac_lab_v1', JSON.stringify(state));
-  const b = $('#saveBadge'); b.textContent = 'Saved'; b.style.borderColor = '#2e7';
+  const b = $('#saveBadge'); if(b){ b.textContent='Saved'; b.style.borderColor='#2e7'; }
 }
 function load(){
   const raw = localStorage.getItem('wfac_lab_v1');
-  if(raw){ state = JSON.parse(raw); }
+  if(raw){ try{ state = JSON.parse(raw); } catch{} }
 }
 
-// ---------- UI init ----------
+/* ---------- Init ---------- */
 function init(){
   load();
   buildModules();
@@ -327,54 +323,67 @@ function init(){
   renderEvidence();
   renderMap();
   updateWordcount();
-  applyMode(); // ensure mode effects and highlights on first load
+  applyMode();
   $('#status').textContent = 'Local autosave on';
+  // header actions
+  $('#toggleNav')?.addEventListener('click', toggleDrawer);
+  $('#exportJson')?.addEventListener('click', exportState);
+  $('#importJson')?.addEventListener('click', ()=>$('#fileInput').click());
+  $('#fileInput')?.addEventListener('change', handleImport);
+  // close drawer on width change
+  const mq = window.matchMedia('(min-width: 901px)');
+  mq.addEventListener('change', () => { if(mq.matches) closeDrawer(); });
 }
 
+/* ---------- Sidebar drawer for phones ---------- */
+function openDrawer(){ $('#sidebar').classList.add('open'); $('#backdrop').classList.remove('hide'); $('#backdrop').classList.add('show'); }
+function closeDrawer(){ $('#sidebar').classList.remove('open'); $('#backdrop').classList.add('hide'); $('#backdrop').classList.remove('show'); }
+function toggleDrawer(){ const open = $('#sidebar').classList.contains('open'); open ? closeDrawer() : openDrawer(); }
+
+/* ---------- Modules and selectors ---------- */
 function buildModules(){
   const box = $('#modules'); box.innerHTML='';
-  COURSE.modules.forEach(m => {
+  COURSE.modules.forEach(m=>{
     const div = document.createElement('div');
     div.className = 'module' + (state.currentModule===m.id?' active':'');
     div.innerHTML = `<b>${m.title}</b><div class="muted">${m.exercises.length} exercises</div>`;
-    div.onclick = ()=>{ state.currentModule = m.id; state.currentExercise = m.exercises[0].id; save(); buildModules(); buildSelectors(); };
+    div.onclick = ()=>{ state.currentModule=m.id; state.currentExercise=m.exercises[0].id; save(); buildModules(); buildSelectors(); if(window.innerWidth<901) closeDrawer(); };
     box.appendChild(div);
   });
 }
 function buildSelectors(){
-  const modSel = $('#moduleSelect'); const exSel = $('#exerciseSelect');
-  const mod = COURSE.modules.find(x => x.id===state.currentModule) || COURSE.modules[0];
+  const modSel = $('#moduleSelect'), exSel = $('#exerciseSelect');
+  const mod = COURSE.modules.find(x=>x.id===state.currentModule) || COURSE.modules[0];
   modSel.innerHTML = COURSE.modules.map(m=>`<option value="${m.id}" ${m.id===mod.id?'selected':''}>${m.title}</option>`).join('');
   exSel.innerHTML = mod.exercises.map(e=>`<option value="${e.id}" ${e.id===state.currentExercise?'selected':''}>${e.label}</option>`).join('');
-  modSel.onchange = e=>{ state.currentModule = e.target.value; const m = COURSE.modules.find(x=>x.id===state.currentModule); state.currentExercise = m.exercises[0].id; save(); buildSelectors(); };
-  exSel.onchange = e=>{ state.currentExercise = e.target.value; save(); };
+  modSel.onchange = e=>{ state.currentModule=e.target.value; const m=COURSE.modules.find(x=>x.id===state.currentModule); state.currentExercise=m.exercises[0].id; save(); buildSelectors(); };
+  exSel.onchange = e=>{ state.currentExercise=e.target.value; save(); };
   buildNodeSelectors();
 }
+
+/* ---------- Lenses ---------- */
 function buildLenses(){
   const box = $('#lenses'); box.innerHTML='';
-  COURSE.lenses.forEach(l => {
+  COURSE.lenses.forEach(l=>{
     const card = document.createElement('div');
     card.className='card';
     card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-      <div>
-        <b>${l.title}</b>
-        <div class="muted" style="font-size:12px">${l.hint}</div>
-      </div>
-      <div class="chip"><input type="checkbox" data-lens="${l.id}" class="lensBox"/><label style="margin-left:6px">On</label></div>
+      <div><b>${l.title}</b><div class="muted" style="font-size:12px">${l.hint}</div></div>
+      <label class="kv"><input type="checkbox" data-lens="${l.id}" class="lensBox" style="margin-right:8px"/>On</label>
     </div>`;
     box.appendChild(card);
   });
   $$('.lensBox').forEach(cb=>cb.onchange = ()=>{ if($('#liveLint').checked) runChecks(); });
 }
 
+/* ---------- Editor ---------- */
 function bindEditor(){
   $('#title').value = state.draft.title || '';
   $('#editor').value = state.draft.body || '';
   $('#title').oninput = e=>{ state.draft.title = e.target.value; save(); };
   $('#editor').oninput = e=>{ state.draft.body = e.target.value; updateWordcount(); if($('#liveLint').checked) runChecks(); save(); };
-  document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); save(); }});
+  document.addEventListener('keydown', e=>{ if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); save(); }});
 }
-
 function insertPrompt(){
   const m = COURSE.modules.find(x=>x.id===state.currentModule);
   const ex = m.exercises.find(x=>x.id===state.currentExercise);
@@ -388,15 +397,13 @@ function appendToEditor(txt){
   const ed = $('#editor'); const start = ed.selectionStart ?? ed.value.length;
   ed.setRangeText(txt, start, start, 'end'); ed.dispatchEvent(new Event('input'));
 }
-
 function togglePreview(){
   const prev = $('#preview'); const ed = $('#editor');
   if(prev.style.display==='none'){ prev.style.display='block'; ed.style.display='none'; prev.innerHTML = renderMarkdown(ed.value); }
   else { prev.style.display='none'; ed.style.display='block'; }
 }
-
 function renderMarkdown(md){
-  let html = md
+  return md
     .replace(/^# (.*$)/gim,'<h1>$1</h1>')
     .replace(/^## (.*$)/gim,'<h2>$1</h2>')
     .replace(/^### (.*$)/gim,'<h3>$1</h3>')
@@ -405,18 +412,16 @@ function renderMarkdown(md){
     .replace(/\*(.*)\*/gim,'<i>$1</i>')
     .replace(/`([^`]+)`/gim,'<code>$1</code>')
     .replace(/\n/g,'<br/>');
-  return html;
 }
-
 function updateWordcount(){
-  const text = $('#editor').value.trim();
-  const words = text? text.split(/\s+/).length:0;
+  const text = ($('#editor').value||'').trim();
+  const words = text ? text.split(/\s+/).length : 0;
   $('#wordcount').textContent = words + ' words';
 }
 
-// ---------- Checks ----------
+/* ---------- Checks ---------- */
 function runChecks(){
-  const text = $('#editor').value;
+  const text = $('#editor').value || '';
   const active = $$('.lensBox').filter(x=>x.checked).map(x=>x.dataset.lens);
   let notes = [];
   if(active.includes('readability')){
@@ -443,7 +448,7 @@ function runChecks(){
   $('#saveBadge').textContent = msg; $('#saveBadge').style.borderColor = notes.length? '#f6a' : '#2e7';
 }
 
-// ---------- Evidence ----------
+/* ---------- Evidence matrix ---------- */
 function addEvidence(){
   const c = $('#ev_claim').value.trim(); const s = $('#ev_source').value.trim(); const n = $('#ev_note').value.trim();
   if(!c||!s) return;
@@ -456,8 +461,7 @@ function renderEvidence(){
   const tbody = $('#ev_table tbody'); tbody.innerHTML='';
   state.evidence.forEach((row,i)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(row.c)}</td><td>${esc(row.s)}</td><td>${esc(row.n||'')}</td>
-      <td><button onclick="removeEvidence(${i})">×</button></td>`;
+    tr.innerHTML = `<td>${esc(row.c)}</td><td>${esc(row.s)}</td><td>${esc(row.n||'')}</td><td><button onclick="removeEvidence(${i})">×</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -467,15 +471,14 @@ function exportEvidence(){
   const csv = header + rows; downloadFile('evidence.csv', csv, 'text/csv');
 }
 
-// ---------- Argument map ----------
+/* ---------- Argument map ---------- */
 let dragId = null;
 function addNode(){
   const label = $('#nodeLabel').value.trim(); if(!label) return;
   const type = $('#nodeType').value;
   const id = 'n'+(Date.now()+Math.random()).toString(36).slice(2,7);
   state.map.nodes.push({id,label,type,x:100+Math.random()*400,y:100+Math.random()*120});
-  $('#nodeLabel').value='';
-  renderMap(); buildNodeSelectors(); save();
+  $('#nodeLabel').value=''; renderMap(); buildNodeSelectors(); save();
 }
 function addEdge(){
   const from = $('#edgeFrom').value; const to = $('#edgeTo').value; if(!from||!to||from===to) return;
@@ -486,30 +489,26 @@ function buildNodeSelectors(){
   $('#edgeFrom').innerHTML = opts; $('#edgeTo').innerHTML = opts;
 }
 function clearMap(){ state.map={nodes:[],edges:[]}; renderMap(); buildNodeSelectors(); save(); }
-
 function renderMap(){
   const canvas = $('#map'); const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  // edges
+  // fit canvas to device pixel ratio for crispness on phones
+  const dpr = window.devicePixelRatio || 1; const rectW = canvas.clientWidth || 800; const rectH = canvas.clientHeight || 360;
+  canvas.width = rectW * dpr; canvas.height = rectH * dpr; ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,rectW,rectH);
   ctx.lineWidth = 1.2; ctx.strokeStyle = '#6b76b6';
   state.map.edges.forEach(e=>{
     const a = state.map.nodes.find(n=>n.id===e.from); const b = state.map.nodes.find(n=>n.id===e.to);
     if(!a||!b) return; drawArrow(ctx, a.x, a.y, b.x, b.y);
   });
-  // nodes
   state.map.nodes.forEach(n=>{
-    const {x,y} = n;
-    const r = 12;
+    const {x,y} = n; const r = 12;
     ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle = colorFor(n.type); ctx.fill(); ctx.strokeStyle = '#1e2346'; ctx.stroke();
     ctx.fillStyle = '#e9ecff'; ctx.font = '12px system-ui'; ctx.textAlign = 'left'; ctx.fillText(n.label, x+16, y+4);
   });
 }
-function colorFor(type){
-  return type==='Claim'? '#3e5fff' : type==='Reason'? '#23c88b' : type==='Evidence'? '#c48bff' : '#ff6e91';
-}
+function colorFor(t){ return t==='Claim'?'#3e5fff': t==='Reason'?'#23c88b': t==='Evidence'?'#c48bff':'#ff6e91'; }
 function drawArrow(ctx,x1,y1,x2,y2){
-  const angle = Math.atan2(y2-y1,x2-x1); const len = Math.hypot(x2-x1,y2-y1);
-  const head = 8; const back = len - head;
+  const angle = Math.atan2(y2-y1,x2-x1), len = Math.hypot(x2-x1,y2-y1), head = 8, back = len - head;
   ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x1 + Math.cos(angle)*back, y1 + Math.sin(angle)*back); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(x2,y2);
   ctx.lineTo(x2 - head*Math.cos(angle - Math.PI/6), y2 - head*Math.sin(angle - Math.PI/6));
@@ -517,88 +516,51 @@ function drawArrow(ctx,x1,y1,x2,y2){
   ctx.closePath(); ctx.fillStyle = '#6b76b6'; ctx.fill();
 }
 $('#map').addEventListener('mousedown', e=>{
-  const rect = e.target.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-  dragId = hitNode(x,y);
+  const rect = e.target.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top; dragId = hitNode(x,y);
 });
 window.addEventListener('mousemove', e=>{
   if(!dragId) return; const canvas = $('#map'); const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left; const y = e.clientY - rect.top;
-  const n = state.map.nodes.find(n=>n.id===dragId); if(n){ n.x = Math.max(10, Math.min(canvas.width-10, x)); n.y = Math.max(10, Math.min(canvas.height-10, y)); renderMap(); }
+  const n = state.map.nodes.find(n=>n.id===dragId); if(n){ n.x=Math.max(10,Math.min(canvas.clientWidth-10,x)); n.y=Math.max(10,Math.min(canvas.clientHeight-10,y)); renderMap(); }
 });
 window.addEventListener('mouseup', ()=>{ if(dragId){ dragId=null; save(); }});
-function hitNode(x,y){
-  for(const n of state.map.nodes){ if(Math.hypot(n.x-x,n.y-y) < 14) return n.id; } return null;
-}
+function hitNode(x,y){ for(const n of state.map.nodes){ if(Math.hypot(n.x-x,n.y-y) < 14) return n.id; } return null; }
 function exportMap(){ const c = $('#map'); const link = document.createElement('a'); link.download = 'argument-map.png'; link.href = c.toDataURL('image/png'); link.click(); }
 
-// ---------- Mode helpers ----------
-function setMode(m){
-  state.mode = m; save();
-  applyMode();
-}
+/* ---------- Modes ---------- */
+function setMode(m){ state.mode=m; save(); applyMode(); }
 function applyMode(){
-  // Visual feedback in badge
   const badge = $('#saveBadge');
-
   if(state.mode==='deep'){
-    checkLens('agency', true);
-    checkLens('evidence', true);
-    checkLens('readability', true);
-    checkLens('counter', false);
-    checkLens('attention', true);
-    checkLens('equity', true);
+    checkLens('agency', true); checkLens('evidence', true); checkLens('readability', true);
+    checkLens('counter', false); checkLens('attention', true); checkLens('equity', true);
     $('#liveLint').checked = true;
-    if(!state.draft.body || state.draft.body.trim().length===0){ insertScaffold(); }
+    if(!state.draft.body?.trim()){ insertScaffold(); }
     badge.textContent = 'Deep dive mode on: drafting lenses active';
   } else if(state.mode==='critique'){
-    checkLens('counter', true);
-    checkLens('equity', true);
-    checkLens('readability', true);
-    checkLens('evidence', true);
-    checkLens('attention', false);
-    checkLens('agency', false);
+    checkLens('counter', true); checkLens('equity', true); checkLens('readability', true); checkLens('evidence', true);
+    checkLens('attention', false); checkLens('agency', false);
     $('#liveLint').checked = true;
     if(!/Critique checklist:/i.test($('#editor').value)){
       appendToEditor('\n\nCritique checklist:\n- Purpose clear and specific?\n- Claims traced to sources?\n- Strongest objection engaged?\n- Risks equitably handled?\n- Sentences concise and concrete?\n');
     }
-    // Open rubric for review
-    $$('details').forEach(d=>{ if(d.querySelector('summary') && /Rubric/i.test(d.querySelector('summary').textContent)){ d.open = true; }});
+    $$('details').forEach(d=>{ const s=d.querySelector('summary'); if(s && /Rubric/i.test(s.textContent)) d.open = true; });
     badge.textContent = 'Critique mode on: review lenses active';
   } else if(state.mode==='sprint'){
-    checkLens('readability', true);
-    checkLens('evidence', false);
-    checkLens('counter', false);
-    checkLens('equity', false);
-    checkLens('attention', false);
-    checkLens('agency', false);
-    $('#liveLint').checked = false;
-    badge.textContent = 'Sprint mode on: write first, edit later';
+    checkLens('readability', true); checkLens('evidence', false); checkLens('counter', false);
+    checkLens('equity', false); checkLens('attention', false); checkLens('agency', false);
+    $('#liveLint').checked = false; badge.textContent = 'Sprint mode on: write first, edit later';
   }
-
-  highlightModeCards();
+  // highlight mode cards and header pill
+  $$('.mode-card').forEach(c=>c.classList.remove('active'));
+  (state.mode==='deep' ? $('#modeDeep') : state.mode==='critique' ? $('#modeCritique') : $('#modeSprint')).classList.add('active');
+  $$('.mode-card .tag').forEach(t=>t.remove());
+  const tag = document.createElement('span'); tag.className = 'tag'; tag.textContent = state.mode==='deep'?'Deep dive on':state.mode==='critique'?'Critique on':'Sprint on';
+  (state.mode==='deep' ? $('#modeDeep') : state.mode==='critique' ? $('#modeCritique') : $('#modeSprint')).appendChild(tag);
+  $('#modePill').textContent = state.mode[0].toUpperCase()+state.mode.slice(1);
   runChecks();
 }
-function highlightModeCards(){
-  $$('.mode-card').forEach(c=>c.classList.remove('active'));
-  if(state.mode==='deep') $('#modeDeep').classList.add('active');
-  else if(state.mode==='critique') $('#modeCritique').classList.add('active');
-  else if(state.mode==='sprint') $('#modeSprint').classList.add('active');
-
-  // add a small tag
-  $$('.mode-card .tag').forEach(t=>t.remove());
-  const map = {sprint:'Sprint on', deep:'Deep dive on', critique:'Critique on'};
-  const activeCard =
-    state.mode==='deep' ? $('#modeDeep') :
-    state.mode==='critique' ? $('#modeCritique') :
-    $('#modeSprint');
-  const tag = document.createElement('span');
-  tag.className='tag'; tag.textContent = map[state.mode];
-  activeCard.appendChild(tag);
-}
-function checkLens(id, on){
-  const cb = document.querySelector(`.lensBox[data-lens="${id}"]`);
-  if(cb) { cb.checked = !!on; }
-}
+function checkLens(id,on){ const cb = document.querySelector(`.lensBox[data-lens="${id}"]`); if(cb) cb.checked = !!on; }
 function startSprint(){
   setMode('sprint');
   const m = COURSE.modules[Math.floor(Math.random()*COURSE.modules.length)];
@@ -608,31 +570,29 @@ function startSprint(){
   $('#saveBadge').textContent = 'Sprint mode on: timer running';
 }
 
-// ---------- Export, import, files ----------
+/* ---------- File ops ---------- */
 function downloadMarkdown(){
-  const md = `# ${state.draft.title||'Untitled'}\n\n${state.draft.body}`;
+  const md = `# ${state.draft.title||'Untitled'}\n\n${state.draft.body||''}`;
   downloadFile('draft.md', md, 'text/markdown');
 }
 function exportState(){ downloadFile('wfac_lab.json', JSON.stringify(state,null,2), 'application/json'); }
+function handleImport(e){
+  const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+  reader.onload = ev=>{ try{ state = JSON.parse(ev.target.result); save(); location.reload(); }catch{ alert('Bad file'); } };
+  reader.readAsText(file);
+}
 function downloadFile(name, content, mime){
   const blob = new Blob([content],{type:mime}); const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),500);
 }
-$('#exportJson').onclick = exportState;
-$('#importJson').onclick = ()=>$('#fileInput').click();
-$('#fileInput').onchange = e=>{
-  const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-  reader.onload = ev=>{ try{ state = JSON.parse(ev.target.result); save(); location.reload(); }catch(err){ alert('Bad file'); } };
-  reader.readAsText(file);
-};
-
 function clearStorage(){ if(confirm('Clear all lab data in this browser')){ localStorage.removeItem('wfac_lab_v1'); location.reload(); } }
-
 function newDoc(){ state.draft={title:'', body:''}; $('#title').value=''; $('#editor').value=''; updateWordcount(); save(); }
-
 function esc(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-// ---------- Boot ----------
+/* ---------- Node selector rebuild on resize ---------- */
+window.addEventListener('resize', ()=>{ renderMap(); });
+
+/* ---------- Boot ---------- */
 init();
 </script>
 </body>
